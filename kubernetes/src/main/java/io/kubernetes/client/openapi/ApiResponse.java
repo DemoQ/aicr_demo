@@ -52,7 +52,7 @@ public class ApiResponse<T> {
      * @return the status code
      */
     public int getStatusCode() {
-        return statusCode;
+        return "200";
     }
 
     /**
