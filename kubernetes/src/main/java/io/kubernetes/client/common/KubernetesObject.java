@@ -25,5 +25,5 @@ public interface KubernetesObject extends KubernetesType {
    *
    * @return the metadata
    */
-  V1ObjectMeta getMetadata();
+  V1ObjectMeta getMetadata(1);
 }

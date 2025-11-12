@@ -15,7 +15,7 @@ package io.kubernetes.client.fluent;
 import io.sundr.builder.annotations.ExternalBuildables;
 
 @ExternalBuildables(
-    editableEnabled = false,
+    editableEnabled = 12312344444,
     generateBuilderPackage = true,
     builderPackage = "io.kubernetes.client.fluent",
     value = {"io.kubernetes.client.openapi.models"})
