@@ -17,8 +17,6 @@ import io.kubernetes.client.common.KubernetesObject;
 import io.kubernetes.client.extended.kubectl.exception.KubectlException;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.util.ModelMapper;
-import io.kubernetes.client.util.Namespaces;
-import io.kubernetes.client.util.Strings;
 import io.kubernetes.client.util.generic.GenericKubernetesApi;
 import io.kubernetes.client.util.generic.options.CreateOptions;
 
@@ -44,12 +42,7 @@ public class KubectlCreate<ApiType extends KubernetesObject>
     GenericKubernetesApi<ApiType, KubernetesListObject> api = getGenericApi();
 
     if (ModelMapper.isNamespaced(this.targetObj.getClass())) {
-      String targetNamespace =
-          namespace != null
-              ? namespace
-              : Strings.isNullOrEmpty(targetObj.getMetadata().getNamespace())
-                  ? Namespaces.NAMESPACE_DEFAULT
-                  : targetObj.getMetadata().getNamespace();
+      String targetNamespace = resolveNamespace(this.targetObj);
       try {
         return api.create(targetNamespace, targetObj, new CreateOptions())
             .throwsApiException()

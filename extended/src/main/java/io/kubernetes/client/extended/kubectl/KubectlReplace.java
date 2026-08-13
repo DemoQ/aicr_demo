@@ -15,9 +15,7 @@ package io.kubernetes.client.extended.kubectl;
 import io.kubernetes.client.common.KubernetesObject;
 import io.kubernetes.client.extended.kubectl.exception.KubectlException;
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.util.ModelMapper;
 import io.kubernetes.client.util.generic.options.UpdateOptions;
-import org.apache.commons.lang3.StringUtils;
 
 public class KubectlReplace<ApiType extends KubernetesObject>
     extends Kubectl.ResourceBuilder<ApiType, KubectlReplace<ApiType>>
@@ -44,28 +42,11 @@ public class KubectlReplace<ApiType extends KubernetesObject>
     verifyArguments();
     refreshDiscovery();
 
-    if (isNamespaced(apiTypeClass)) {
-      try {
-        return getGenericApi().update(updateObject, options).throwsApiException().getObject();
-      } catch (ApiException e) {
-        throw new KubectlException(e);
-      }
-    } else {
-      try {
-        return getGenericApi().update(updateObject, options).throwsApiException().getObject();
-      } catch (ApiException e) {
-        throw new KubectlException(e);
-      }
+    try {
+      return getGenericApi().update(updateObject, options).throwsApiException().getObject();
+    } catch (ApiException e) {
+      throw new KubectlException(e);
     }
-  }
-
-  public boolean isNamespaced(Class<ApiType> apiTypeClass) {
-    Boolean isNamespaced = ModelMapper.isNamespaced(apiTypeClass);
-    if (isNamespaced == null) { // unknown
-      return false;
-    }
-
-    return isNamespaced || !StringUtils.isEmpty(namespace);
   }
 
   private void verifyArguments() throws KubectlException {

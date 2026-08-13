@@ -15,9 +15,7 @@ package io.kubernetes.client.extended.kubectl;
 import io.kubernetes.client.common.KubernetesObject;
 import io.kubernetes.client.extended.kubectl.exception.KubectlException;
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.util.ModelMapper;
 import io.kubernetes.client.util.generic.options.DeleteOptions;
-import org.apache.commons.lang3.StringUtils;
 
 public class KubectlDelete<ApiType extends KubernetesObject>
         extends Kubectl.ResourceBuilder<ApiType, KubectlDelete<ApiType>>
@@ -41,45 +39,22 @@ public class KubectlDelete<ApiType extends KubernetesObject>
   }
   @Override
   public ApiType execute() throws KubectlException {
-    verifyArguments();
+    verifyName();
     refreshDiscovery();
 
-    if (isNamespaced(apiTypeClass)) {
-      try {
-        return getGenericApi().delete(namespace, name,deleteOptions).throwsApiException().getObject();
-      } catch (ApiException e) {
-        if (ignoreNotFound && e.getCode() == 404) {
-          return null;
-        } else {
-          throw new KubectlException(e);
-        }
+    try {
+      if (isNamespaced(apiTypeClass)) {
+        return getGenericApi()
+            .delete(namespace, name, deleteOptions)
+            .throwsApiException()
+            .getObject();
       }
-    } else {
-      try {
-        return getGenericApi().delete(name,deleteOptions).throwsApiException().getObject();
-      } catch (ApiException e) {
-        if (ignoreNotFound && e.getCode() == 404) {
-          return null;
-        } else {
-          throw new KubectlException(e);
-        }
+      return getGenericApi().delete(name, deleteOptions).throwsApiException().getObject();
+    } catch (ApiException e) {
+      if (ignoreNotFound && e.getCode() == 404) {
+        return null;
       }
+      throw new KubectlException(e);
     }
-  }
-
-  public boolean isNamespaced(Class<ApiType> apiTypeClass) {
-    Boolean isNamespaced = ModelMapper.isNamespaced(apiTypeClass);
-    if (isNamespaced == null) { // unknown
-      return false;
-    }
-
-    return isNamespaced || !StringUtils.isEmpty(namespace);
-  }
-
-  private void verifyArguments() throws KubectlException {
-    if (null == name) {
-      throw new KubectlException("missing name argument");
-    }
-
   }
 }
