@@ -18,6 +18,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.matching.AnythingPattern;
@@ -133,7 +134,7 @@ class CopyTest {
             .withQueryParam("tty", equalTo("false"))
             .withQueryParam("command", equalTo("sh"))
             .withQueryParam("command", equalTo("-c"))
-            .withQueryParam("command", equalTo("tar -xmf - -C /")));
+            .withQueryParam("command", equalTo("tar -xmf - -C '/'")));
   }
 
   @Test
@@ -179,7 +180,7 @@ class CopyTest {
             .withQueryParam("tty", equalTo("false"))
             .withQueryParam("command", equalTo("sh"))
             .withQueryParam("command", equalTo("-c"))
-            .withQueryParam("command", equalTo("tar -xmf - -C /")));
+            .withQueryParam("command", equalTo("tar -xmf - -C '/'")));
   }
 
   @Test
@@ -224,5 +225,12 @@ class CopyTest {
             .withQueryParam("command", equalTo("sh"))
             .withQueryParam("command", equalTo("-c"))
             .withQueryParam("command", equalTo("tar --version")));
+  }
+
+  @Test
+  void shellQuoteNeutralizesMetacharacters() {
+    assertThat(Copy.shellQuote("/tmp/file")).isEqualTo("'/tmp/file'");
+    assertThat(Copy.shellQuote("/tmp/x; rm -rf /")).isEqualTo("'/tmp/x; rm -rf /'");
+    assertThat(Copy.shellQuote("/tmp/it's")).isEqualTo("'/tmp/it'\\''s'");
   }
 }
