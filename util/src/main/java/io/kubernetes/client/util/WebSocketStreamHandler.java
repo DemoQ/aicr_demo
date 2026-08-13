@@ -265,6 +265,8 @@ public class WebSocketStreamHandler implements WebSockets.SocketListener, Closea
         try {
           Thread.sleep(100);
         } catch (InterruptedException ex) {
+          Thread.currentThread().interrupt();
+          throw new InterruptedIOException("Interrupted while waiting for web-socket to flush.");
         }
         // Wait a maximum of 10 seconds.
         if (i++ > 100) {

@@ -257,7 +257,8 @@ public class Kubectl {
                 .append("No such api list type class ")
                 .append(apiListTypeClassName)
                 .append(", consider explicitly load the class by apiListTypeClass()?")
-                .toString());
+                .toString(),
+            e);
       }
     }
 

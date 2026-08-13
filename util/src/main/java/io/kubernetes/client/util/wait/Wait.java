@@ -19,8 +19,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Wait {
+
+  private static final Logger log = LoggerFactory.getLogger(Wait.class);
 
   /**
    * Poll tries a condition func until it returns true, an exception, or the timeout is reached.
@@ -53,6 +57,7 @@ public class Wait {
               try {
                 result.set(condition.get());
               } catch (Exception e) {
+                log.warn("Polled condition threw an exception, treating it as unmet", e);
                 result.set(false);
               }
             },
@@ -67,6 +72,7 @@ public class Wait {
         }
       }
     } catch (Exception e) {
+      log.warn("Aborting polling loop unexpectedly", e);
       return result.get();
     }
     future.cancel(true);

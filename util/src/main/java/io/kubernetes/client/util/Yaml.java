@@ -179,7 +179,7 @@ public class Yaml {
         try {
           list.add(modelMapper((Map<String, Object>) object));
         } catch (ClassCastException ex) {
-          logger.error("Unexpected exception while casting: {}", ex);
+          throw new IOException("Unexpected exception while casting yaml document", ex);
         }
       }
     }

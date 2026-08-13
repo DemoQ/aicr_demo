@@ -28,4 +28,8 @@ public class KubectlException extends Exception {
   public KubectlException(Throwable cause) {
     super(cause);
   }
+
+  public KubectlException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }
