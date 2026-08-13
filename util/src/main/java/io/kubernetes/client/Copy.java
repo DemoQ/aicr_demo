@@ -83,7 +83,7 @@ public class Copy extends Exec {
         this.exec(
             namespace,
             pod,
-            new String[] {"sh", "-c", "cat " + srcPath + " | base64"},
+            new String[] {"sh", "-c", "cat " + shellQuote(srcPath) + " | base64"},
             container,
             false,
             false);
@@ -175,7 +175,7 @@ public class Copy extends Exec {
         this.exec(
             namespace,
             pod,
-            new String[] {"sh", "-c", "tar cz - " + srcPath + " | base64"},
+            new String[] {"sh", "-c", "tar cz - " + shellQuote(srcPath) + " | base64"},
             container,
             false,
             false);
@@ -292,7 +292,7 @@ public class Copy extends Exec {
           this.exec(
               namespace,
               pod,
-              new String[] {"sh", "-c", "ls -F " + srcPath},
+              new String[] {"sh", "-c", "ls -F " + shellQuote(srcPath)},
               container,
               false,
               false);
@@ -318,6 +318,16 @@ public class Copy extends Exec {
         }
       }
     }
+  }
+
+  /**
+   * Quotes a path so that it is passed verbatim to the shell running inside the container.
+   *
+   * @param value the value to quote
+   * @return a single-quoted POSIX shell word
+   */
+  static String shellQuote(String value) {
+    return "'" + value.replace("'", "'\\''") + "'";
   }
 
   /*
@@ -417,7 +427,7 @@ public class Copy extends Exec {
     return this.exec(
         namespace,
         pod,
-        new String[] {"sh", "-c", "tar -xmf - -C " + parentPath},
+        new String[] {"sh", "-c", "tar -xmf - -C " + shellQuote(parentPath)},
         container,
         true,
         false);
