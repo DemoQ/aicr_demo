@@ -104,7 +104,9 @@ public class LegacyEventBroadcaster implements EventBroadcaster {
                 recordToSink(event);
               }
             } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
               logger.info("shutdown signaled");
+              return;
             } catch (Throwable t) {
               logger.error("failed recording event", t);
             }
@@ -146,6 +148,9 @@ public class LegacyEventBroadcaster implements EventBroadcaster {
             event = new CoreV1EventBuilder(event).build();
             event.getMetadata().setResourceVersion("");
             updateExistingEvent = false;
+          } else {
+            logger.error("failed patching existing event", patchException);
+            return false;
           }
         }
       }
@@ -159,6 +164,7 @@ public class LegacyEventBroadcaster implements EventBroadcaster {
             logger.error("event already exists", e);
             return true;
           }
+          logger.error("failed creating event", e);
           return false;
         }
       }

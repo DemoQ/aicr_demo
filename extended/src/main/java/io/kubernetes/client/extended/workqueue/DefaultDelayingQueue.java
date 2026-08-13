@@ -24,9 +24,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** The default delaying queue implementation. */
 public class DefaultDelayingQueue<T> extends DefaultWorkQueue<T> implements DelayingQueue<T> {
+
+  private static final Logger log = LoggerFactory.getLogger(DefaultDelayingQueue.class);
 
   public static Duration heartBeatInterval = Duration.ofSeconds(10);
 
@@ -113,7 +117,8 @@ public class DefaultDelayingQueue<T> extends DefaultWorkQueue<T> implements Dela
         }
       }
     } catch (InterruptedException e) {
-      // empty block
+      Thread.currentThread().interrupt();
+      log.debug("Delaying queue waiting loop interrupted, exiting", e);
     }
   }
 

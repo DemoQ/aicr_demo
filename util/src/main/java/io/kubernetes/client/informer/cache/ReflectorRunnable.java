@@ -151,7 +151,9 @@ public class ReflectorRunnable<
             try {
               Thread.sleep(1000L);
             } catch (InterruptedException e) {
-              // no-op
+              Thread.currentThread().interrupt();
+              log.info("{}#Watch retry interrupted, aborting list-watch", this.apiTypeClass);
+              return;
             }
             continue;
           }

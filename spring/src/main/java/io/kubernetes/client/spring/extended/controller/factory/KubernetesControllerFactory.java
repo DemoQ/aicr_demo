@@ -104,7 +104,7 @@ public class KubernetesControllerFactory implements FactoryBean<Controller> {
           workQueueKeyFunc = watch.workQueueKeyFunc().newInstance();
         } catch (InvocationTargetException e) {
           throw new BeanCreationException(
-              "Failed instantiating controller watch: " + e.getMessage());
+              "Failed instantiating controller watch: " + e.getMessage(), e);
         }
 
         final Function<? extends KubernetesObject, Request> finalWorkQueueKeyFunc =
@@ -124,7 +124,7 @@ public class KubernetesControllerFactory implements FactoryBean<Controller> {
           builder = builder.withReadyFunc(readyFunc);
         }
       } catch (IllegalAccessException | InstantiationException e) {
-        throw new BeanCreationException("Failed instantiating controller: " + e.getMessage());
+        throw new BeanCreationException("Failed instantiating controller: " + e.getMessage(), e);
       }
     }
 
