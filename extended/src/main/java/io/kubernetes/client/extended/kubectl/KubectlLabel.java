@@ -14,12 +14,9 @@ package io.kubernetes.client.extended.kubectl;
 
 import io.kubernetes.client.common.KubernetesObject;
 import io.kubernetes.client.extended.kubectl.exception.KubectlException;
-import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.util.ModelMapper;
 import io.kubernetes.client.util.labels.Labels;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 
 public class KubectlLabel<ApiType extends KubernetesObject>
     extends Kubectl.ResourceBuilder<ApiType, KubectlLabel<ApiType>>
@@ -44,45 +41,11 @@ public class KubectlLabel<ApiType extends KubernetesObject>
 
   @Override
   public ApiType execute() throws KubectlException {
-    verifyArguments();
+    verifyName();
     refreshDiscovery();
 
-    final ApiType currentObj;
-    if (isNamespaced(apiTypeClass)) {
-      try {
-        currentObj = getGenericApi().get(namespace, name).throwsApiException().getObject();
-      } catch (ApiException e) {
-        throw new KubectlException(e);
-      }
-    } else {
-      try {
-        currentObj = getGenericApi().get(name).throwsApiException().getObject();
-      } catch (ApiException e) {
-        throw new KubectlException(e);
-      }
-    }
-
+    ApiType currentObj = getCurrentObject();
     Labels.addLabels(currentObj, addingLabels);
-
-    try {
-      return getGenericApi().update(currentObj).throwsApiException().getObject();
-    } catch (ApiException e) {
-      throw new KubectlException(e);
-    }
-  }
-
-  public boolean isNamespaced(Class<ApiType> apiTypeClass) {
-    Boolean isNamespaced = ModelMapper.isNamespaced(apiTypeClass);
-    if (isNamespaced == null) { // unknown
-      return false;
-    }
-
-    return isNamespaced || !StringUtils.isEmpty(namespace);
-  }
-
-  private void verifyArguments() throws KubectlException {
-    if (null == name) {
-      throw new KubectlException("missing name argument");
-    }
+    return updateObject(currentObj);
   }
 }

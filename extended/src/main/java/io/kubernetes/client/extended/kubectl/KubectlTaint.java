@@ -57,7 +57,7 @@ public class KubectlTaint extends Kubectl.ResourceBuilder<V1Node, KubectlTaint>
 
   @Override
   public V1Node execute() throws KubectlException {
-    verifyArguments();
+    verifyName();
     try {
       return executeInternal();
     } catch (ApiException | IOException ex) {
@@ -95,11 +95,5 @@ public class KubectlTaint extends Kubectl.ResourceBuilder<V1Node, KubectlTaint>
       return Taints.Effect.NO_EXECUTE;
     }
     throw new KubectlException("Unknown effect: " + effect);
-  }
-
-  private void verifyArguments() throws KubectlException {
-    if (null == name) {
-      throw new KubectlException("missing name argument");
-    }
   }
 }

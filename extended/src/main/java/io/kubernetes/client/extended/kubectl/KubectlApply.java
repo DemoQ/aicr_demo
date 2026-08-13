@@ -17,10 +17,8 @@ import io.kubernetes.client.common.KubernetesObject;
 import io.kubernetes.client.custom.V1Patch;
 import io.kubernetes.client.extended.kubectl.exception.KubectlException;
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.util.Namespaces;
 import io.kubernetes.client.util.Strings;
 import io.kubernetes.client.util.generic.GenericKubernetesApi;
-import io.kubernetes.client.util.generic.KubernetesApiResponse;
 import io.kubernetes.client.util.generic.options.PatchOptions;
 
 public class KubectlApply<ApiType extends KubernetesObject>
@@ -80,14 +78,7 @@ public class KubectlApply<ApiType extends KubernetesObject>
     patchOptions.setFieldManager(this.fieldManager);
 
     if (isNamespaced(this.targetObj)) {
-      String targetNamespace =
-          namespace != null
-              ? namespace
-              : Strings.isNullOrEmpty(targetObj.getMetadata().getNamespace())
-                  ? Namespaces.NAMESPACE_DEFAULT
-                  : targetObj.getMetadata().getNamespace();
-
-      KubernetesApiResponse<KubernetesObject> response = null;
+      String targetNamespace = resolveNamespace(this.targetObj);
       try {
         return (ApiType)
             api.patch(

@@ -22,9 +22,12 @@ import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.util.ModelMapper;
+import io.kubernetes.client.util.Namespaces;
+import io.kubernetes.client.util.Strings;
 import io.kubernetes.client.util.generic.GenericKubernetesApi;
 import io.kubernetes.client.util.generic.dynamic.DynamicKubernetesListObject;
 import io.kubernetes.client.util.generic.dynamic.DynamicKubernetesObject;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Kubectl provides a set of helper functions that has the same functionalities as corresponding
@@ -310,6 +313,52 @@ public class Kubectl {
     protected GenericKubernetesApi<ApiType, KubernetesListObject> getGenericApi()
         throws KubectlException {
       return getGenericApi(apiTypeClass, KubernetesListObject.class);
+    }
+
+    protected void verifyName() throws KubectlException {
+      if (null == name) {
+        throw new KubectlException("missing name argument");
+      }
+    }
+
+    public boolean isNamespaced(Class<ApiType> apiTypeClass) {
+      Boolean isNamespaced = ModelMapper.isNamespaced(apiTypeClass);
+      if (isNamespaced == null) { // unknown
+        return false;
+      }
+      return isNamespaced || !StringUtils.isEmpty(namespace);
+    }
+
+    /**
+     * Resolves the namespace to operate on for the given object, preferring the explicitly
+     * configured namespace, then the object's own namespace, then the default namespace.
+     */
+    protected String resolveNamespace(KubernetesObject obj) {
+      if (namespace != null) {
+        return namespace;
+      }
+      String objNamespace = obj.getMetadata().getNamespace();
+      return Strings.isNullOrEmpty(objNamespace) ? Namespaces.NAMESPACE_DEFAULT : objNamespace;
+    }
+
+    /** Fetches the object referenced by this builder's name (and namespace, if applicable). */
+    protected ApiType getCurrentObject() throws KubectlException {
+      try {
+        if (isNamespaced(apiTypeClass)) {
+          return getGenericApi().get(namespace, name).throwsApiException().getObject();
+        }
+        return getGenericApi().get(name).throwsApiException().getObject();
+      } catch (ApiException e) {
+        throw new KubectlException(e);
+      }
+    }
+
+    protected ApiType updateObject(ApiType obj) throws KubectlException {
+      try {
+        return getGenericApi().update(obj).throwsApiException().getObject();
+      } catch (ApiException e) {
+        throw new KubectlException(e);
+      }
     }
 
     protected boolean isNamespaced(KubernetesObject obj) {
